@@ -62,6 +62,8 @@ export interface IWidget<TValue = any, TOptions = any> {
     clicked?: boolean;
     marker?: boolean;
     callback?: WidgetCallback<this>;
+    /** Optional callback to customize how the value is displayed in the widget */
+    getDisplayValue?: (value: TValue, widget: this) => string;
     /** Called by `LGraphCanvas.drawNodeWidgets` */
     draw?(
         ctx: CanvasRenderingContext2D,

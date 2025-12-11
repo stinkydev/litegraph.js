@@ -208,6 +208,18 @@ The fourth optional parameter could be options for the widget, the parameters ac
 * **precision**: set the number of digits after decimal point
 * **callback**: function to call when the value changes.
 
+Additionally, for slider widgets, you can customize how the value is displayed by setting a **getDisplayValue** callback on the widget after creation:
+
+```js
+function MyNode()
+{
+  var slider = this.addWidget("slider", "Volume", 0.5, null, { min: 0, max: 1 });
+  slider.getDisplayValue = function(value, widget) {
+    return Math.round(value * 100) + "%"; // Display as percentage
+  };
+}
+```
+
 Widget's value is not serialized by default when storing the node state, but if you want to store the value of widgets just set serialize_widgets to true:
 
 ```js

@@ -9967,12 +9967,18 @@ LGraphNode.prototype.executeAction = function(action)
                     if (show_text) {
                         ctx.textAlign = "center";
                         ctx.fillStyle = text_color;
-                        ctx.fillText(
-                            w.label || w.name + "  " + Number(w.value).toFixed(
+                        var display_value;
+                        if (w.getDisplayValue) {
+                            display_value = w.label || w.name + "  " + w.getDisplayValue(w.value, w);
+                        } else {
+                            display_value = w.label || w.name + "  " + Number(w.value).toFixed(
                                                             w.options.precision != null
                                                                 ? w.options.precision
                                                                 : 3
-                                                        ),
+                                                        );
+                        }
+                        ctx.fillText(
+                            display_value,
                             widget_width * 0.5,
                             y + H * 0.7
                         );
