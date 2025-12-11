@@ -4,6 +4,8 @@ npm-debug.log
 temp/
 temp/*
 coverage/
+build/
+dist/
 
 # Editors
 /.vscode/*
