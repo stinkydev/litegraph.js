@@ -8,7 +8,7 @@ on:
     tags:
       - "v*"
 jobs:
-  publish-npm:
+  npm-publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
