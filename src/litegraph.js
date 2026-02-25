@@ -10075,6 +10075,39 @@ LGraphNode.prototype.executeAction = function(action)
 						ctx.restore();
                     }
                     break;
+                case "color":
+                    ctx.textAlign = "left";
+                    ctx.strokeStyle = outline_color;
+                    ctx.fillStyle = background_color;
+                    ctx.beginPath();
+                    if (show_text)
+                        ctx.roundRect(margin, y, widget_width - margin * 2, H, [H * 0.5]);
+                    else
+                        ctx.rect(margin, y, widget_width - margin * 2, H);
+                    ctx.fill();
+                    if (show_text) {
+                        if (!w.disabled)
+                            ctx.stroke();
+                        // draw color swatch
+                        var swatchSize = H - 4;
+                        ctx.fillStyle = w.value || "#000000";
+                        ctx.beginPath();
+                        ctx.roundRect(widget_width - margin - swatchSize - 2, y + 2, swatchSize, swatchSize, [H * 0.35]);
+                        ctx.fill();
+                        ctx.strokeStyle = outline_color;
+                        ctx.stroke();
+                        // draw label
+                        ctx.fillStyle = secondary_text_color;
+                        const colorLabel = w.label || w.name;
+                        if (colorLabel != null) {
+                            ctx.fillText(colorLabel, margin * 2, y + H * 0.7);
+                        }
+                        // draw hex value text
+                        ctx.fillStyle = text_color;
+                        ctx.textAlign = "right";
+                        ctx.fillText(String(w.value).substr(0, 30), widget_width - margin - swatchSize - 8, y + H * 0.7);
+                    }
+                    break;
                 default:
                     if (w.draw) {
                         w.draw(ctx, node, widget_width, y, H);
@@ -10259,6 +10292,41 @@ LGraphNode.prototype.executeAction = function(action)
 							}.bind(w),
 							event,w.options ? w.options.multiline : false );
 					}
+					break;
+				case "color":
+					if (event.type == LiteGraph.pointerevents_method+"down") {
+						var that_canvas = this;
+						var color_widget = w;
+						// create a temporary hidden color input
+						var colorInput = document.createElement("input");
+						colorInput.type = "color";
+						colorInput.value = w.value || "#000000";
+						colorInput.style.position = "absolute";
+						colorInput.style.left = "-9999px";
+						colorInput.style.top = "-9999px";
+						document.body.appendChild(colorInput);
+						colorInput.addEventListener("input", function(e) {
+							color_widget.value = e.target.value;
+							inner_value_change(color_widget, color_widget.value);
+							that_canvas.dirty_canvas = true;
+						});
+						colorInput.addEventListener("change", function(e) {
+							color_widget.value = e.target.value;
+							inner_value_change(color_widget, color_widget.value);
+							that_canvas.dirty_canvas = true;
+							if (colorInput.parentNode)
+								colorInput.parentNode.removeChild(colorInput);
+						});
+						// fallback cleanup if no change is made
+						colorInput.addEventListener("blur", function(e) {
+							setTimeout(function() {
+								if (colorInput.parentNode)
+									colorInput.parentNode.removeChild(colorInput);
+							}, 200);
+						});
+						colorInput.click();
+					}
+					this.dirty_canvas = true;
 					break;
 				default:
 					if (w.mouse) {
@@ -12488,6 +12556,42 @@ LGraphNode.prototype.executeAction = function(action)
 					}
 				});
             }
+			else if (type == "color") {
+				value_element.style.cursor = "pointer";
+				value_element.style.backgroundColor = value;
+				value_element.style.color = "#fff";
+				value_element.style.textShadow = "0 0 2px #000";
+				value_element.addEventListener("click", function(event){
+					var propname = this.parentNode.dataset["property"];
+					var elem_that = this;
+					var colorInput = document.createElement("input");
+					colorInput.type = "color";
+					colorInput.value = elem_that.innerText || "#000000";
+					colorInput.style.position = "absolute";
+					colorInput.style.left = "-9999px";
+					colorInput.style.top = "-9999px";
+					document.body.appendChild(colorInput);
+					colorInput.addEventListener("input", function(e){
+						elem_that.innerText = e.target.value;
+						elem_that.style.backgroundColor = e.target.value;
+						innerChange(propname, e.target.value);
+					});
+					colorInput.addEventListener("change", function(e){
+						elem_that.innerText = e.target.value;
+						elem_that.style.backgroundColor = e.target.value;
+						innerChange(propname, e.target.value);
+						if (colorInput.parentNode)
+							colorInput.parentNode.removeChild(colorInput);
+					});
+					colorInput.addEventListener("blur", function(e){
+						setTimeout(function(){
+							if (colorInput.parentNode)
+								colorInput.parentNode.removeChild(colorInput);
+						}, 200);
+					});
+					colorInput.click();
+				});
+			}
 
 			root.content.appendChild(elem);
 

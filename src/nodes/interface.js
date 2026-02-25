@@ -795,4 +795,119 @@
     };
 
     LiteGraph.registerNodeType("widget/panel", WidgetPanel);
+
+    /* Color Picker ****************/
+
+    function WidgetColor() {
+        this.addOutput("color", "string");
+        this.addOutput("r", "number");
+        this.addOutput("g", "number");
+        this.addOutput("b", "number");
+        this.properties = { value: "#ff0000" };
+        this.size = [200, 80];
+        this._color = [1, 0, 0];
+    }
+
+    WidgetColor.title = "Color";
+    WidgetColor.desc = "Color picker widget";
+
+    WidgetColor.prototype.onDrawForeground = function(ctx) {
+        if (this.flags.collapsed) {
+            return;
+        }
+
+        var margin = 10;
+        var swatchH = this.size[1] - margin * 2;
+        var swatchW = swatchH;
+
+        // draw color swatch
+        ctx.fillStyle = "#000";
+        ctx.fillRect(margin + 1, margin + 1, swatchW, swatchH);
+        ctx.fillStyle = this.properties.value;
+        ctx.fillRect(margin, margin, swatchW, swatchH);
+        ctx.strokeStyle = "#aaa";
+        ctx.strokeRect(margin, margin, swatchW, swatchH);
+
+        // draw hex label
+        ctx.fillStyle = "#fff";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText(
+            this.properties.value,
+            margin + swatchW + 10,
+            margin + swatchH * 0.5 + 5
+        );
+
+        // draw RGB values
+        ctx.fillStyle = "#aaa";
+        ctx.font = "10px Arial";
+        ctx.fillText(
+            "R:" + Math.round(this._color[0] * 255) +
+            " G:" + Math.round(this._color[1] * 255) +
+            " B:" + Math.round(this._color[2] * 255),
+            margin + swatchW + 10,
+            margin + swatchH * 0.5 + 20
+        );
+        ctx.textAlign = "left";
+    };
+
+    WidgetColor.prototype.onMouseDown = function(e, local_pos) {
+        if (this.flags.collapsed) {
+            return;
+        }
+        var that = this;
+        var colorInput = document.createElement("input");
+        colorInput.type = "color";
+        colorInput.value = this.properties.value;
+        colorInput.style.position = "absolute";
+        colorInput.style.left = "-9999px";
+        colorInput.style.top = "-9999px";
+        document.body.appendChild(colorInput);
+        colorInput.addEventListener("input", function(ev) {
+            that.properties.value = ev.target.value;
+            that._parseColor();
+            that.setDirtyCanvas(true);
+        });
+        colorInput.addEventListener("change", function(ev) {
+            that.properties.value = ev.target.value;
+            that._parseColor();
+            that.setDirtyCanvas(true);
+            if (colorInput.parentNode)
+                colorInput.parentNode.removeChild(colorInput);
+        });
+        colorInput.addEventListener("blur", function(ev) {
+            setTimeout(function() {
+                if (colorInput.parentNode)
+                    colorInput.parentNode.removeChild(colorInput);
+            }, 200);
+        });
+        colorInput.click();
+        return true;
+    };
+
+    WidgetColor.prototype._parseColor = function() {
+        var hex = this.properties.value;
+        if (hex && hex.length >= 7) {
+            this._color[0] = parseInt(hex.substr(1, 2), 16) / 255;
+            this._color[1] = parseInt(hex.substr(3, 2), 16) / 255;
+            this._color[2] = parseInt(hex.substr(5, 2), 16) / 255;
+        }
+    };
+
+    WidgetColor.prototype.onExecute = function() {
+        this._parseColor();
+        this.setOutputData(0, this.properties.value);
+        this.setOutputData(1, this._color[0]);
+        this.setOutputData(2, this._color[1]);
+        this.setOutputData(3, this._color[2]);
+        this.boxcolor = this.properties.value;
+    };
+
+    WidgetColor.prototype.onPropertyChanged = function(name, value) {
+        if (name === "value") {
+            this._parseColor();
+        }
+    };
+
+    LiteGraph.registerNodeType("widget/color", WidgetColor);
 })(this);
