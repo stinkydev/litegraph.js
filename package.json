@@ -20,7 +20,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/jagenjo/litegraph.js.git"
+        "url": "git+https://github.com/stinkydev/litegraph.js.git"
     },
     "author": "jagenjo",
     "license": "MIT",
@@ -30,9 +30,9 @@
         "src/litegraph.d.ts"
     ],
     "bugs": {
-        "url": "https://github.com/jagenjo/litegraph.js/issues"
+        "url": "https://github.com/stinkydev/litegraph.js/issues"
     },
-    "homepage": "https://github.com/jagenjo/litegraph.js#readme",
+    "homepage": "https://github.com/stinkydev/litegraph.js#readme",
     "devDependencies": {
         "@types/jest": "^28.1.3",
         "eslint": "^8.37.0 ",
